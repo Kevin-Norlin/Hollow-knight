@@ -1,0 +1,3 @@
+-IC:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src
+-target
+
