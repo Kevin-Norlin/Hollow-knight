@@ -42,6 +42,11 @@ void graphic_pixel_clear(int x, int y);
 
 void init_app(void);
 
+// Keyb
+unsigned char keyb(void);
+void activateRow(int row);
+int readColumn(void);
+
 
 
 // Structs
@@ -61,6 +66,7 @@ typedef struct tObj{
 		PGEOMETRY geo;
 		int dirx,diry;
 		int posx,posy;
+		int jumpFrames;
 		void (* draw) (struct tObj *);
 		void (* clear) (struct tObj *);
 		void (* move) (struct tObj *);
@@ -71,7 +77,6 @@ typedef struct tObj{
 void draw_object(POBJECT o);
 void clear_object(POBJECT o);
 void move_object(POBJECT o);
-
 void set_speed_object(POBJECT o, int dirx, int diry);
 
 
@@ -100,10 +105,15 @@ GEOMETRY player_geometry = {
 	}
 };
 
-OBJECT player =  {
+OBJECT playerObject =  {
 	&player_geometry,
-	0,0,
-	0,0,
+	0,0,			// Dir x y
+	0,64-15,			// Pos x y
+	0,				// Jump-frames
+	draw_object,
+	clear_object,
+	move_object,
+	set_speed_object
 	
 };
 
@@ -111,11 +121,45 @@ OBJECT player =  {
 
 void main(void)
 {
+	graphic_initialize();
+	graphic_clear_screen();
 	app_init();
-	draw_object(&player);
+	char c;
+	int jumpFramer;
+	
+	OBJECT player = playerObject;
+	POBJECT pplayer = &player;
+	
+	draw_object(pplayer);
+	
+	while (1) {
+		pplayer->move(pplayer);
+		if (pplayer->jumpFrames != 0) {
+			int newJumpFrame = pplayer->jumpFrames - 1;
+			set_jumpFrames_object(pplayer, newJumpFrame);
+			
+		}
+		if (pplayer->jumpFrames == 10) {
+			pplayer->set_speed(pplayer,pplayer->dirx,2);
+		}
+		if (pplayer->jumpFrames == 0) {
+			pplayer->set_speed(pplayer,pplayer->dirx,0);
+		}
+		jumpFramer = pplayer->jumpFrames;
+		
+		int speed = pplayer->diry;
+		c = keyb();
+		switch(c) {
+			case 4: pplayer->set_speed(pplayer, -2, 0); break;
+			case 6: pplayer->set_speed(pplayer,2,0); break;
+			case 2: if (pplayer->jumpFrames== 0) { pplayer->set_speed(pplayer,pplayer->dirx,-2); pplayer->jumpFrames=20; break; }
+		}
+	}
+	
 }
 
 void app_init(void) {
+	
 	// port D medium speed
 	*((volatile unsigned int *)0x40020C08) = 0x55555555;
 	/* starta klockor port D och E */
@@ -131,7 +175,7 @@ void app_init(void) {
 
 
 
-// DISPLAY
+// ---- DISPLAY ----
 
 __attribute__((naked))
 void graphic_initialize(void) {
@@ -157,6 +201,84 @@ void graphic_pixel_clear(int x, int y) {
 }
 
 
+// ---- Keyb ----
+unsigned char keyb(void) {
+    char key[] = {1,2,3,0xA,4,5,6,0xB,7,8,9,0xC,0xE,0,0xF,0xD};
+    for (int i = 1; i < 5; i++) {
+        activateRow(i);
+        int column = readColumn();
+        if (column != 0) {
+            activateRow(0);
+            return key[4*(i - 1) + (column - 1)];
+        }
+        
+        }
+		
+            activateRow(0);
+            return 0xFF;
+    
+}
+void activateRow(int row) {
+    switch (row) {
+        case 1:
+            *GPIO_D_ODR_HIGH = 0x10;
+            break;
+            
+        case 2:
+            *GPIO_D_ODR_HIGH = 0x20;
+            break;
+            
+        case 3:
+            *GPIO_D_ODR_HIGH = 0x40;
+            break;
+            
+        case 4:
+            *GPIO_D_ODR_HIGH = 0x80;
+            break;
+            
+        default: 
+            *GPIO_D_ODR_HIGH = 0;
+    }
+}
+
+int readColumn(void) {
+    char c = *GPIO_D_IDR_HIGH;
+    if (c & 8) {
+		return 4;
+	}
+	if (c & 4) {
+		return 3;
+	}
+	if (c & 2) {
+		return 2;
+	}
+	if (c & 1) {
+		return 1;
+	}
+	return 0;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---- Object functions ----
+
 void draw_object(POBJECT o){
 	PGEOMETRY go = o->geo;
 	int npoints = go->numPixels;
@@ -177,7 +299,8 @@ void move_object(POBJECT o){
 	o->clear(o);
 	int newPosX = o->posx + o->dirx;
 	int newPosY = o->posy + o->diry;
-	if (newPosX < 0 || newPosX > 128) {
+	
+	if (newPosX < 0 || newPosX > 128- o->geo->sizex) {
 		newPosX = o->posx;
 	}
 	if (newPosY < 0 || newPosY > 256) {
@@ -193,6 +316,13 @@ void set_speed_object(POBJECT o, int dirx, int diry) {
 	o->dirx = dirx;
 	o->diry = diry;
 }
+
+void set_jumpFrames_object(POBJECT o, int jumpFramess) {
+	int n = jumpFramess;
+	o->jumpFrames = jumpFramess;
+	int burh = o->jumpFrames;
+}
+
 	
 	
 
