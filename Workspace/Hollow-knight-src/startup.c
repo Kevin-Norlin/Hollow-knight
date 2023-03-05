@@ -49,6 +49,8 @@ int readColumn(void);
 
 
 
+
+
 // Structs
 
 typedef struct {
@@ -79,6 +81,8 @@ void clear_object(POBJECT o);
 void move_object(POBJECT o);
 void set_speed_object(POBJECT o, int dirx, int diry);
 
+// Game logic functions
+void handle_jump(POBJECT pplayer);
 
 
 // Player geo
@@ -105,6 +109,24 @@ GEOMETRY player_geometry = {
 	}
 };
 
+GEOMETRY platform_geometry = {
+	40,
+	20, 2,
+	{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0}, {16, 0}, {17, 0}, {18, 0}, {19, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}, {12, 1}, {13, 1}, {14, 1}, {15, 1}, {16, 1}, {17, 1}, {18, 1}, {19, 1}}
+
+};
+
+OBJECT platform_low_left = {
+	&platform_geometry,
+	0,0,
+	40,64-12,
+	0,
+	draw_object,
+	clear_object,
+	move_object,
+	set_speed_object
+};
+
 OBJECT playerObject =  {
 	&player_geometry,
 	0,0,			// Dir x y
@@ -119,40 +141,31 @@ OBJECT playerObject =  {
 
 
 
+
+
 void main(void)
 {
 	graphic_initialize();
 	graphic_clear_screen();
 	app_init();
 	char c;
-	int jumpFramer;
-	
 	OBJECT player = playerObject;
 	POBJECT pplayer = &player;
-	
+	OBJECT platform_left = platform_low_left;
+	POBJECT pplatform_low_left = &platform_left;
+	draw_object(pplatform_low_left);
 	draw_object(pplayer);
 	
 	while (1) {
 		pplayer->move(pplayer);
-		if (pplayer->jumpFrames != 0) {
-			int newJumpFrame = pplayer->jumpFrames - 1;
-			set_jumpFrames_object(pplayer, newJumpFrame);
-			
-		}
-		if (pplayer->jumpFrames == 10) {
-			pplayer->set_speed(pplayer,pplayer->dirx,2);
-		}
-		if (pplayer->jumpFrames == 0) {
-			pplayer->set_speed(pplayer,pplayer->dirx,0);
-		}
-		jumpFramer = pplayer->jumpFrames;
-		
+		handle_jump(pplayer);
 		int speed = pplayer->diry;
 		c = keyb();
 		switch(c) {
 			case 4: pplayer->set_speed(pplayer, -2, 0); break;
 			case 6: pplayer->set_speed(pplayer,2,0); break;
-			case 2: if (pplayer->jumpFrames== 0) { pplayer->set_speed(pplayer,pplayer->dirx,-2); pplayer->jumpFrames=20; break; }
+			case 2: if (pplayer->jumpFrames == 0) { pplayer->set_speed(pplayer,pplayer->dirx,-2); pplayer->jumpFrames=20; break; }
+			default: pplayer->set_speed(pplayer,0,pplayer->diry); break;
 		}
 	}
 	
@@ -165,6 +178,7 @@ void app_init(void) {
 	/* starta klockor port D och E */
 	* ( (unsigned long *) 0x40023830) = 0x18;
 	
+	// Keypad - DP8-15
 	// 2 pin output, 2 pin input, 4 pin output
     *GPIO_D_MODER = 0x55000000;
 	// Open drain
@@ -323,6 +337,21 @@ void set_jumpFrames_object(POBJECT o, int jumpFramess) {
 	int burh = o->jumpFrames;
 }
 
+
+
+// Game logic
+
+void handle_jump(POBJECT pplayer) {
+		if (pplayer->jumpFrames != 0) {
+			set_jumpFrames_object(pplayer, pplayer->jumpFrames - 1);	
+		}
+		if (pplayer->jumpFrames == 10) {
+			pplayer->set_speed(pplayer,pplayer->dirx,2);
+		}
+		if (pplayer->jumpFrames == 0) {
+			pplayer->set_speed(pplayer,pplayer->dirx,0);
+		}
+}
 	
 	
 

@@ -5,15 +5,15 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="FileName"/>
-      <int Value="165" Name="FirstVisibleLine"/>
-      <int Value="178" Name="CurrentLine"/>
+      <int Value="137" Name="FirstVisibleLine"/>
+      <int Value="150" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src\tObj.h" Name="FileName"/>
       <int Value="0" Name="FirstVisibleLine"/>
-      <int Value="23" Name="CurrentLine"/>
+      <int Value="0" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
@@ -22,7 +22,7 @@
     <long Value="1" Name="Count"/>
     <SerializedObject Name="Breakpoint0">
       <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="file"/>
-      <int Value="113" Name="lineno"/>
+      <int Value="130" Name="lineno"/>
       <wxString Value="" Name="function_name"/>
       <wxString Value="" Name="memory_address"/>
       <int Value="1" Name="bp_type"/>
@@ -34,7 +34,7 @@
       <bool Value="1" Name="is_enabled"/>
       <long Value="0" Name="ignore_number"/>
       <wxString Value="" Name="conditions"/>
-      <int Value="0" Name="origin"/>
+      <int Value="1" Name="origin"/>
     </SerializedObject>
   </SerializedObject>
   <wxString Value="*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc;*.plist;*.txt" Name="m_findInFilesMask"/>
