@@ -6,15 +6,15 @@
 ProjectName            :=Hollow-knight-src
 ConfigurationName      :=Debug
 WorkspaceConfiguration :=Debug
-WorkspacePath          :="C:/Users/kevin/EDA 485 MOP/CodeLite (C)/Hollow-knight-MD407/Workspace"
-ProjectPath            :="C:/Users/kevin/EDA 485 MOP/CodeLite (C)/Hollow-knight-MD407/Workspace/Hollow-knight-src"
+WorkspacePath          :=C:/Users/kevin/mop/Hollow-knight-MD407/Workspace
+ProjectPath            :=C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src
 IntermediateDirectory  :=$(ConfigurationName)
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=kevin
-Date                   :=05/03/2023
+Date                   :=06/03/2023
 CodeLitePath           :=C:/cseapp/CodeLite
 LinkerName             :=$(CodeLiteDir)/tools/gcc-arm/bin/arm-none-eabi-g++.exe
 SharedObjectLinkerName :=$(CodeLiteDir)/tools/gcc-arm/arm-none-eabi-g++.exe -shared -fPIC
@@ -109,7 +109,7 @@ PreBuild:
 ##
 $(IntermediateDirectory)/startup.c$(ObjectSuffix): startup.c
 	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/startup.c$(ObjectSuffix) -MF$(IntermediateDirectory)/startup.c$(DependSuffix) -MM startup.c
-	$(CC) $(SourceSwitch) "C:/Users/kevin/EDA 485 MOP/CodeLite (C)/Hollow-knight-MD407/Workspace/Hollow-knight-src/startup.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/startup.c$(ObjectSuffix) $(IncludePath)
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/startup.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/startup.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/startup.c$(PreprocessSuffix): startup.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/startup.c$(PreprocessSuffix) startup.c
 

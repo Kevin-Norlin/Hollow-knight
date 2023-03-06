@@ -31,25 +31,40 @@ __asm__ volatile(".L1: B .L1\n");				/* never return */
 	#define GPIO_E_IDR_HIGH ((volatile unsigned char *)(GPIO_E + 0x11))
 	#define GPIO_E_ODR_LOW ((volatile unsigned char *)(GPIO_E + 0x14))
 	#define GPIO_E_ODR_HIGH ((volatile unsigned char *)(GPIO_E + 0x15))	
+	
+	/* Timer 6 */
+	#define TIM6    0x40001000
+	#define	TIM6_CR1	((volatile unsigned short *) 0x40001000)
+	#define	TIM6_DIER	((volatile unsigned short *) 0x4000100C)
+	#define	TIM6_SR 	((volatile unsigned short *) 0x40001010)
+	#define	TIM6_CNT	((volatile unsigned short *) 0x40001024)
+	#define TIM6_PSC    ((volatile unsigned short *) 0x40001028)
+	#define	TIM6_ARR	((volatile unsigned short *) 0x4000102C)
+
+	#define SCB_VTOR    ((volatile unsigned int *) 0xE000ED08) // Relokeras automatiskt --> 0x2001C000
+	#define TIM6_IRQVEC ((volatile unsigned int *) 0x2001C118)
+
+	#define NVIC_TIM6_IRQ_BPOS (1 << 22)
+	#define NVIC_TIM6_ISER  ((volatile unsigned int*) 0xE000E104)
+	#define UIE         (1 << 0) // 01 Binärt
+	#define UIF         (1 << 0) 
+	#define	UDIS		(1 << 1) // 10
+	#define	CEN			(1 << 0) 
+	
+	// Bitar i styrregistret ASCII
+	#define	B_E			0x40
+	#define B_SELECT 	4
+	#define	B_RW		2
+	#define	B_RS		1
+	
+#define SYS_TICK 0xE000E010
+	#define STK_CTRL	((volatile unsigned int *) SYS_TICK)
+	#define	STK_LOAD	((volatile unsigned int *) (SYS_TICK + 0x04))
+	#define STK_VAL		((volatile unsigned int *) (SYS_TICK + 0x08))
+
+	
 
 	#define MAX_POINTS	50
-
-// Drivrutiner för grafisk display
-void graphic_initialize(void);
-void graphic_clear_screen(void);
-void graphic_pixel_set(int x, int y);
-void graphic_pixel_clear(int x, int y);
-
-void init_app(void);
-
-// Keyb
-unsigned char keyb(void);
-void activateRow(int row);
-int readColumn(void);
-
-
-
-
 
 // Structs
 
@@ -75,6 +90,37 @@ typedef struct tObj{
 		void (* set_speed) (struct tObj *, int, int);
 } OBJECT, *POBJECT;
 
+// ---- Function labels ----
+
+// Drivrutiner för grafisk display
+void graphic_initialize(void);
+void graphic_clear_screen(void);
+void graphic_pixel_set(int x, int y);
+void graphic_pixel_clear(int x, int y);
+
+void init_app(void);
+
+// Keyb
+unsigned char keyb(void);
+void activateRow(int row);
+int readColumn(void);
+
+// Ascii
+
+
+void ascii_ctrl_bit_set (unsigned char x);
+void ascii_ctrl_bit_clear (unsigned char x);
+void ascii_write_cmd(unsigned char command);
+void ascii_write_data(unsigned char data);
+unsigned char ascii_read_status(void);
+unsigned char ascii_read_data(void);
+void ascii_write_controller(unsigned char byte);
+unsigned char ascii_read_controller(void);
+void ascii_init(void);
+void app_init(void);
+void ascii_write_string(char *str);
+void intToString(int n, char *str);
+
 // object functions
 void draw_object(POBJECT o);
 void clear_object(POBJECT o);
@@ -83,9 +129,28 @@ void set_speed_object(POBJECT o, int dirx, int diry);
 
 // Game logic functions
 void handle_jump(POBJECT pplayer);
+int check_collision(POBJECT p, POBJECT platform);
+
+// Ball functions
+void move_ballobject(POBJECT o);
+
+// Tim6 functions
+void timer6_interrupt();
+void timer6_init();
 
 
-// Player geo
+
+void delay_250ns(void);
+void delay_mikro(unsigned int us);
+void delay_milli(unsigned int ms);
+
+// ---- Global variables ----
+static volatile int ticks;
+static volatile int seconds;
+
+
+
+// ---- GEOMETRY ----
 
 GEOMETRY player_geometry = {
 	49,
@@ -116,6 +181,18 @@ GEOMETRY platform_geometry = {
 
 };
 
+GEOMETRY ball_geometry =
+{
+	12, 	/* numpoints */
+	4,4,	/* sizex,sizey */
+	{
+		/* px[0,1,2...]*/
+		{0,1},{0,2},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,1},{3,2}
+	}
+};
+
+// ---- OBJECTS ----
+
 OBJECT platform_low_left = {
 	&platform_geometry,
 	0,0,
@@ -130,7 +207,7 @@ OBJECT platform_low_left = {
 OBJECT playerObject =  {
 	&player_geometry,
 	0,0,			// Dir x y
-	0,64-15,			// Pos x y
+	0,64-15,	//64-15		// Pos x y
 	0,				// Jump-frames
 	draw_object,
 	clear_object,
@@ -140,7 +217,17 @@ OBJECT playerObject =  {
 };
 
 
-
+OBJECT ballobject =
+{
+	&ball_geometry, /* geometri för en boll */
+	3,1,			/* inititala riktigtskoordinater */
+	1,1,			/* initial startposition */
+	0,
+	draw_object,
+	clear_object,
+	move_ballobject,
+	set_speed_object
+};
 
 
 void main(void)
@@ -148,26 +235,75 @@ void main(void)
 	graphic_initialize();
 	graphic_clear_screen();
 	app_init();
+	char prevSeconds;
 	char c;
+	int ballCount = 1;
+	int collision = 0;
 	OBJECT player = playerObject;
 	POBJECT pplayer = &player;
-	OBJECT platform_left = platform_low_left;
-	POBJECT pplatform_low_left = &platform_left;
-	draw_object(pplatform_low_left);
-	draw_object(pplayer);
+	POBJECT balls[10];
+	char str[10];
+	OBJECT ball1 = ballobject;
+	balls[0] = &ball1;
+	
+	
 	
 	while (1) {
+		intToString(seconds, &str);
+		
+		
+		if (seconds != prevSeconds) {
+		ascii_clear_display();
+		ascii_write_string(str);
+		}
+		prevSeconds = seconds;
 		pplayer->move(pplayer);
+		
+		for (int i = 0; i < ballCount; i++) {
+			balls[i]->move(balls[i]);
+		}
+	
+		
+		if (seconds == 100) {
+			OBJECT ball2 = ballobject;
+			
+			balls[ballCount++] = &ball2;
+		}
+		if (seconds == 150) {
+			OBJECT ball3 = ballobject;
+			
+			balls[ballCount++] = &ball3;
+		}
+		
+		for (int i = 0; i < ballCount; i++) {
+			if (check_collision(balls[i],pplayer)) {
+				collision = 1;
+			}
+		}
+		if (collision) {
+			break;
+		}
+		
+		
 		handle_jump(pplayer);
 		int speed = pplayer->diry;
 		c = keyb();
 		switch(c) {
-			case 4: pplayer->set_speed(pplayer, -2, 0); break;
-			case 6: pplayer->set_speed(pplayer,2,0); break;
-			case 2: if (pplayer->jumpFrames == 0) { pplayer->set_speed(pplayer,pplayer->dirx,-2); pplayer->jumpFrames=20; break; }
+			case 4: pplayer->set_speed(pplayer, -2, pplayer->diry); break;
+			case 6: pplayer->set_speed(pplayer,  2, pplayer->diry); break;
+			case 2: if (pplayer->jumpFrames == 0) { pplayer->set_speed(pplayer,pplayer->dirx,-2); pplayer->jumpFrames=40; break; }
 			default: pplayer->set_speed(pplayer,0,pplayer->diry); break;
 		}
 	}
+	
+	
+	ascii_clear_display();
+	ascii_gotoxy(1,1);
+	ascii_write_string("Game Over!");
+	ascii_gotoxy(1,2);
+	ascii_write_string("Score: ");
+	ascii_write_string(str);
+	 
 	
 }
 
@@ -185,6 +321,10 @@ void app_init(void) {
     *GPIO_D_OTYPER = 0xFF;
 	// 2 pin Floating - 2 pin pull down - 4 pin reserved 
     *GPIO_D_PUPDR = 0xAAFFFF;
+	
+	timer6_init();
+	
+	*GPIO_E_MODER |= 0x00005555;
 }
 
 
@@ -275,22 +415,6 @@ int readColumn(void) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ---- Object functions ----
 
 void draw_object(POBJECT o){
@@ -323,7 +447,6 @@ void move_object(POBJECT o){
 	o->posx = newPosX;
 	o->posy = newPosY;
 	o->draw(o);
-	// Kanske också set_speed?
 }
 
 void set_speed_object(POBJECT o, int dirx, int diry) {
@@ -332,27 +455,278 @@ void set_speed_object(POBJECT o, int dirx, int diry) {
 }
 
 void set_jumpFrames_object(POBJECT o, int jumpFramess) {
-	int n = jumpFramess;
 	o->jumpFrames = jumpFramess;
-	int burh = o->jumpFrames;
+
+}
+
+void move_ballobject(POBJECT o){
+	o->clear(o);
+	int x = o->posx;
+	int y = o->posy;
+	int dx = o->dirx;
+	int dy = o->diry;
+	
+	x+=dx;
+	y+=dy;
+	
+	if(x < 1){
+		dx =-dx; // Bounce if it hits left border
+	}
+	
+	
+	if(x + o->geo->sizex > 128){
+		dx =-dx; // Bounce if it hits right border   - should no longer bounce, lose if right border
+	}
+	 
+	if(y < 1){
+		dy =-dy; // Bounce if it hits top border
+	}
+	if(y + o->geo->sizey > 64){
+		dy =-dy; // Bounce if it hits bottom border
+	
+	}
+	
+	
+	o->posx = x;
+	o->posy = y;
+	o->set_speed(o,dx,dy);
+	o->draw(o);
 }
 
 
 
-// Game logic
+
+
+
+// ---- Game logic ----
 
 void handle_jump(POBJECT pplayer) {
 		if (pplayer->jumpFrames != 0) {
 			set_jumpFrames_object(pplayer, pplayer->jumpFrames - 1);	
 		}
-		if (pplayer->jumpFrames == 10) {
+		if (pplayer->jumpFrames == 20) {
 			pplayer->set_speed(pplayer,pplayer->dirx,2);
 		}
 		if (pplayer->jumpFrames == 0) {
 			pplayer->set_speed(pplayer,pplayer->dirx,0);
 		}
 }
+
+int check_collision(POBJECT ball, POBJECT paddle) {
+	int collidesXaxis = (ball->posx >= paddle->posx) && (ball->posx < paddle->posx + paddle->geo->sizex);
+	int collidesYaxis = (ball->posy >= paddle->posy) && (ball->posy < paddle->posy + paddle->geo->sizey);
+	return collidesXaxis && collidesYaxis;
+}
+
+// ---- Tim6 ----
+
+void timer6_init()
+{
 	
+    ticks = 0;
+    seconds = 0;
+    *TIM6_CR1 &= ~CEN;
+	
+	
+	*TIM6_IRQVEC = timer6_interrupt;
+    *NVIC_TIM6_ISER |= NVIC_TIM6_IRQ_BPOS;
+	//Funkar bra på hårdvaran, för segt här
+    // 100 ms tidbas
+    //*TIM6_PSC    = 839;
+    //*TIM6_ARR   = 9999;
+	*TIM6_PSC    = 114;
+	*TIM6_ARR   = 999;
+	
+    *TIM6_DIER |= UIE;
+    *TIM6_CR1  |= CEN;
+
+
+
+}
+
+void timer6_interrupt()
+{
+    //100 ms period
+    *TIM6_SR &= ~UIF; // Kvitera avbrott
+    ticks++;
+    if (ticks > 9)
+    {
+        ticks = 0;
+        seconds++;
+    }
+}
+
+// ---- Ascii ----
+void ascii_ctrl_bit_set (unsigned char x) {
+	*GPIO_E_ODR_LOW |= x;
+	*GPIO_E_ODR_LOW |= B_SELECT;
+}
+void ascii_ctrl_bit_clear (unsigned char x) {
+	*GPIO_E_ODR_LOW &= ~x;
+	*GPIO_E_ODR_LOW |= B_SELECT;
+	
+}
+
+void ascii_write_cmd(unsigned char command) {
+	ascii_ctrl_bit_clear(B_RS);
+	ascii_ctrl_bit_clear(B_RW);
+	
+	ascii_write_controller(command);
+	
+}
+void ascii_write_data(unsigned char data) {
+	ascii_ctrl_bit_set(B_RS);
+	ascii_ctrl_bit_clear(B_RW);
+	
+	ascii_write_controller(data);
+	
+}
+	
+void ascii_write_controller(unsigned char byte) {
+	//delay_delay250ns
+	ascii_ctrl_bit_set(B_E);
+	*GPIO_E_ODR_HIGH = byte;
+	delay_250ns();
+	ascii_ctrl_bit_clear(B_E);
+	
+	
+}
+
+unsigned char ascii_read_controller(void) {
+	*GPIO_E_MODER = 0x00005555;
+	ascii_ctrl_bit_set(B_E);
+	//delay_250ns();
+	//delay_250ns();
+	unsigned char rw = *GPIO_E_IDR_HIGH;
+	ascii_ctrl_bit_clear(B_E);
+	*GPIO_E_MODER = 0x55555555;
+	return rw;
+	
+	
+}
+
+unsigned char ascii_read_status(void) {
+	*GPIO_E_MODER = 0x00005555;
+	ascii_ctrl_bit_clear(B_RS);
+	ascii_ctrl_bit_set(B_RW);
+	unsigned char rw = ascii_read_controller();
+	*GPIO_E_MODER = 0x55555555;
+	return rw;
+}
+
+unsigned char ascii_read_data(void) {
+	*GPIO_E_MODER &= 0x0000FFFF;
+	ascii_ctrl_bit_set(B_RS);
+	ascii_ctrl_bit_set(B_RW);
+	unsigned char rw = ascii_read_controller();
+	*GPIO_E_MODER |= 0x55550000;
+	return rw;
+}
+
+
+void ascii_init(void) {
+	ascii_ctrl_bit_clear(B_RS);
+	ascii_ctrl_bit_clear(B_RW);
+	
+	ascii_write_cmd(0b00111000); // 2 rader, 5 x 8.
+	
+	ascii_write_cmd(0b00001110); // Display på, markör på, blinkande markör av.
+	
+	ascii_write_cmd(0b00000110); // Increment, skift av.
+	
+}
+
+
+
+void ascii_gotoxy(int row, int col) {
+	int address = row -1;
+	if (col == 2) {
+		address = address + 0x40;
+	}
+	ascii_write_cmd(0x80 | address);
+}
+
+void ascii_write_char(unsigned char c) {
+	ascii_ctrl_bit_clear(B_RS);
+	ascii_ctrl_bit_set(B_RW);
+	while ((ascii_read_status() & 0x80) == 0x80) {
+		
+	}
+	delay_mikro(4);
+	ascii_write_data(c);
+	delay_mikro(1);
+	
+}
+
+void ascii_clear_display( void ) {
+	while ((ascii_read_status() & 0x80) == 0x80) {
+		
+	}
+	delay_mikro(4);
+	ascii_write_cmd(1);
+	delay_mikro(1);
+}
+
+void intToString(int n, char *str) {
+	int temp = n;
+	int digits = 0;
+	while (temp) {
+		temp /= 10;
+		digits++;
+	}
+	
+	for (int i = digits -1; i >= 0; i--) {
+		str[i] = '0' + (n % 10);
+		n /= 10;
+	}
+	str[digits] = '\0';
+	
+}
+
+void ascii_write_string(char *str) {
+	while (*str) {
+		ascii_write_char(*str++);
+	}
+}
+
+
+// ---- Delay ----
+
+void delay_250ns(void) {
+	int countValue = 42; // Antal klockcykler för 250ns
+	*STK_CTRL = 0;
+	*STK_LOAD = countValue;
+	*STK_VAL = 0;
+	*STK_CTRL = 5;
+	volatile int count = *STK_CTRL;
+	while ((count < 30)){
+		count = *STK_CTRL;
+		}
+	*STK_CTRL = 0;
+}
+
+void delay_mikro(unsigned int us) {
+	for (int i = 0; i < us; i++) {
+		delay_250ns();
+		delay_250ns();
+		delay_250ns();
+		delay_250ns();
+	}
+}
+void delay_milli(unsigned int ms) {
+	for (int i = 0; i < ms; i++) {
+		delay_mikro(1000);
+	}
+}
+
+
+
+
+
+
+
+	
+
 	
 
 
