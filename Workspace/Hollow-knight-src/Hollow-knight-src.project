@@ -135,7 +135,20 @@ monitor restart</PostConnectCommands>
     </Configuration>
   </Settings>
   <VirtualDirectory Name="src">
-    <File Name="tObj.h"/>
+    <File Name="logic.h"/>
+    <File Name="logic.c"/>
+    <File Name="timer6.h"/>
+    <File Name="timer6.c"/>
+    <File Name="delay.h"/>
+    <File Name="delay.c"/>
+    <File Name="ascii.h"/>
+    <File Name="ascii.c"/>
+    <File Name="keyb.h"/>
+    <File Name="keyb.c"/>
+    <File Name="graphics.h"/>
+    <File Name="graphics.c"/>
+    <File Name="objects.h"/>
+    <File Name="objects.c"/>
     <File Name="startup.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="resources">

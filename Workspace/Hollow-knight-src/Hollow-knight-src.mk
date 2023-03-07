@@ -14,7 +14,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=kevin
-Date                   :=06/03/2023
+Date                   :=07/03/2023
 CodeLitePath           :=C:/cseapp/CodeLite
 LinkerName             :=$(CodeLiteDir)/tools/gcc-arm/bin/arm-none-eabi-g++.exe
 SharedObjectLinkerName :=$(CodeLiteDir)/tools/gcc-arm/arm-none-eabi-g++.exe -shared -fPIC
@@ -70,7 +70,7 @@ ARM_M4SFPLIB:=$(CodeLiteDir)/tools/gcc-arm/arm-none-eabi/lib/thumb/v7e-m+fp/soft
 ARM_GCC_M4SFPLIB:=$(CodeLiteDir)/tools/gcc-arm/lib/gcc/arm-none-eabi/9.2.1/thumb/v7e-m+fp/softfp
 ARM_M4HFPLIB:=$(CodeLiteDir)/tools/gcc-arm/arm-none-eabi/lib/thumb/v7e-m+fp/hard
 ARM_GCC_M4HFPLIB:=$(CodeLiteDir)/tools/gcc-arm/lib/gcc/arm-none-eabi/9.2.1/thumb/v7e-m+fp/hard
-Objects0=$(IntermediateDirectory)/startup.c$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/logic.c$(ObjectSuffix) $(IntermediateDirectory)/objects.c$(ObjectSuffix) $(IntermediateDirectory)/startup.c$(ObjectSuffix) $(IntermediateDirectory)/keyb.c$(ObjectSuffix) $(IntermediateDirectory)/graphics.c$(ObjectSuffix) $(IntermediateDirectory)/ascii.c$(ObjectSuffix) $(IntermediateDirectory)/delay.c$(ObjectSuffix) $(IntermediateDirectory)/timer6.c$(ObjectSuffix) 
 
 
 
@@ -107,11 +107,53 @@ PreBuild:
 ##
 ## Objects
 ##
+$(IntermediateDirectory)/logic.c$(ObjectSuffix): logic.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/logic.c$(ObjectSuffix) -MF$(IntermediateDirectory)/logic.c$(DependSuffix) -MM logic.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/logic.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/logic.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/logic.c$(PreprocessSuffix): logic.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/logic.c$(PreprocessSuffix) logic.c
+
+$(IntermediateDirectory)/objects.c$(ObjectSuffix): objects.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/objects.c$(ObjectSuffix) -MF$(IntermediateDirectory)/objects.c$(DependSuffix) -MM objects.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/objects.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/objects.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/objects.c$(PreprocessSuffix): objects.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/objects.c$(PreprocessSuffix) objects.c
+
 $(IntermediateDirectory)/startup.c$(ObjectSuffix): startup.c
 	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/startup.c$(ObjectSuffix) -MF$(IntermediateDirectory)/startup.c$(DependSuffix) -MM startup.c
 	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/startup.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/startup.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/startup.c$(PreprocessSuffix): startup.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/startup.c$(PreprocessSuffix) startup.c
+
+$(IntermediateDirectory)/keyb.c$(ObjectSuffix): keyb.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/keyb.c$(ObjectSuffix) -MF$(IntermediateDirectory)/keyb.c$(DependSuffix) -MM keyb.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/keyb.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/keyb.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/keyb.c$(PreprocessSuffix): keyb.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/keyb.c$(PreprocessSuffix) keyb.c
+
+$(IntermediateDirectory)/graphics.c$(ObjectSuffix): graphics.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/graphics.c$(ObjectSuffix) -MF$(IntermediateDirectory)/graphics.c$(DependSuffix) -MM graphics.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/graphics.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/graphics.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/graphics.c$(PreprocessSuffix): graphics.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/graphics.c$(PreprocessSuffix) graphics.c
+
+$(IntermediateDirectory)/ascii.c$(ObjectSuffix): ascii.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ascii.c$(ObjectSuffix) -MF$(IntermediateDirectory)/ascii.c$(DependSuffix) -MM ascii.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/ascii.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ascii.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/ascii.c$(PreprocessSuffix): ascii.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ascii.c$(PreprocessSuffix) ascii.c
+
+$(IntermediateDirectory)/delay.c$(ObjectSuffix): delay.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/delay.c$(ObjectSuffix) -MF$(IntermediateDirectory)/delay.c$(DependSuffix) -MM delay.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/delay.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/delay.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/delay.c$(PreprocessSuffix): delay.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/delay.c$(PreprocessSuffix) delay.c
+
+$(IntermediateDirectory)/timer6.c$(ObjectSuffix): timer6.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/timer6.c$(ObjectSuffix) -MF$(IntermediateDirectory)/timer6.c$(DependSuffix) -MM timer6.c
+	$(CC) $(SourceSwitch) "C:/Users/kevin/mop/Hollow-knight-MD407/Workspace/Hollow-knight-src/timer6.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/timer6.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/timer6.c$(PreprocessSuffix): timer6.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/timer6.c$(PreprocessSuffix) timer6.c
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

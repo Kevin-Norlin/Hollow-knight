@@ -1,28 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Session Name="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Workspace.workspace">
-  <int Value="0" Name="m_selectedTab"/>
-  <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Workspace.workspace" Name="m_workspaceName"/>
+<Session Name="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Workspace.workspace">
+  <int Value="2" Name="m_selectedTab"/>
+  <wxString Value="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Workspace.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
-      <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="FileName"/>
-      <int Value="137" Name="FirstVisibleLine"/>
-      <int Value="150" Name="CurrentLine"/>
+      <wxString Value="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="FileName"/>
+      <int Value="138" Name="FirstVisibleLine"/>
+      <int Value="152" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
-      <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src\tObj.h" Name="FileName"/>
+      <wxString Value="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Hollow-knight-src\objects.c" Name="FileName"/>
+      <int Value="78" Name="FirstVisibleLine"/>
+      <int Value="66" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Hollow-knight-src\objects.h" Name="FileName"/>
       <int Value="0" Name="FirstVisibleLine"/>
-      <int Value="0" Name="CurrentLine"/>
+      <int Value="4" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
   </TabInfoArray>
   <SerializedObject Name="m_breakpoints">
-    <long Value="1" Name="Count"/>
+    <long Value="2" Name="Count"/>
     <SerializedObject Name="Breakpoint0">
-      <wxString Value="C:\Users\kevin\EDA 485 MOP\CodeLite (C)\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="file"/>
-      <int Value="130" Name="lineno"/>
+      <wxString Value="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="file"/>
+      <int Value="157" Name="lineno"/>
       <wxString Value="" Name="function_name"/>
       <wxString Value="" Name="memory_address"/>
       <int Value="1" Name="bp_type"/>
@@ -34,8 +41,24 @@
       <bool Value="1" Name="is_enabled"/>
       <long Value="0" Name="ignore_number"/>
       <wxString Value="" Name="conditions"/>
-      <int Value="1" Name="origin"/>
+      <int Value="0" Name="origin"/>
+    </SerializedObject>
+    <SerializedObject Name="Breakpoint1">
+      <wxString Value="C:\Users\kevin\mop\Hollow-knight-MD407\Workspace\Hollow-knight-src\startup.c" Name="file"/>
+      <int Value="157" Name="lineno"/>
+      <wxString Value="" Name="function_name"/>
+      <wxString Value="" Name="memory_address"/>
+      <int Value="1" Name="bp_type"/>
+      <int Value="0" Name="watchpoint_type"/>
+      <wxString Value="" Name="watchpt_data"/>
+      <CData Name="commandlist"/>
+      <bool Value="0" Name="regex"/>
+      <bool Value="0" Name="is_temp"/>
+      <bool Value="1" Name="is_enabled"/>
+      <long Value="0" Name="ignore_number"/>
+      <wxString Value="" Name="conditions"/>
+      <int Value="0" Name="origin"/>
     </SerializedObject>
   </SerializedObject>
-  <wxString Value="*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc;*.plist;*.txt" Name="m_findInFilesMask"/>
+  <wxString Value="*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc;*.xml;*.json;*.sql;*.txt;*.plist;CMakeLists.txt;*.rc;*.iss" Name="m_findInFilesMask"/>
 </Session>

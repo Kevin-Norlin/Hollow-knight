@@ -1,1 +1,1 @@
-Debug/startup.c.o   
+Debug/logic.c.o Debug/objects.c.o Debug/startup.c.o Debug/keyb.c.o Debug/graphics.c.o Debug/ascii.c.o Debug/delay.c.o Debug/timer6.c.o   
